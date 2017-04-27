@@ -27,8 +27,11 @@ uint32_t readWord(uint32_t word){
   uint32_t littleEndian = 0;
   //Convert to little endian
   for(int i = 0; i < 4; i++){
+    uint32_t temp;
     //get the correct bytes
-    littleEndian += ((word << (24-(8*i))) >> 24);
+    temp = ((word << (24-(8*i))));
+    temp = (temp >> 24);
+    littleEndian += temp;
     
     if(i != 3){
     //Shift left a byte to make room for next byte
@@ -104,6 +107,28 @@ void readOBJ(FILE * file, char * filename){
      printf("File %s is an R2k object module\n", filename);
   }
 
+  //Print version number
+  uint16_t year, month, day = 0;
+  //Decode the year
+  year = table.version >> (16-7);
+  
+  //Decode the month
+  //Compiler simplifiers simplifiers two shifts into only 1, found that out the
+  //hard way, so must be 2 lines.
+  month = ((table.version << 7));
+  month = (month >> 12);
+  
+  //Decode the day
+  day = table.version << (11);
+  day = day >> (11);
+  
+  printf("%#x\n",table.version);
+
+  //Print module version
+  printf("Module version: 2%03d/%02d/%02d\n", year, month, day);
+  
+
+  
   
 
 }
