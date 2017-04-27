@@ -89,8 +89,20 @@ void readOBJ(FILE * file, char * filename){
     return;
   }
   
-  //Retrieve entry point
+  //print 20 hyphons
+  printf("--------------------\n");
 
+  //Retrieve entry point
+  read32;//skip null
+  read32;
+  table.entry = readWord(ptr32);
+  
+  if(table.entry){//entry exists, file is load module
+     printf("File %s is an R2K load module (entry point %#010x)\n", filename, table.entry);
+  }
+  else{//object module
+     printf("File %s is an R2k object module\n", filename);
+  }
 
   
 
