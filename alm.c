@@ -121,13 +121,28 @@ void readOBJ(FILE * file, char * filename){
   //Decode the day
   day = table.version << (11);
   day = day >> (11);
-  
-  printf("%#x\n",table.version);
+
 
   //Print module version
   printf("Module version: 2%03d/%02d/%02d\n", year, month, day);
   
-
+  
+  //Grab sections
+  for(int i = 0; i < N_EH; i++){
+    //Read each section and store in data array in table
+    read32;
+    table.data[i] = readWord(ptr32);   
+  }
+  
+  //Print sections
+  char * sectionNames[] = {"text", "rdata", "data","sdata", "sbss", "bss", "reloc", "ref", "symtab", "strings"};
+  
+  for(int i = 0; i < N_EH; i++){
+    //Print every section that exists
+    if(table.data[i]){
+      printf("Section %s is %d bytes long\n", sectionNames[i], table.data[i]);
+    }
+  }
   
   
 
