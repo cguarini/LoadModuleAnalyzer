@@ -168,6 +168,9 @@ int readOBJ(FILE * file, char * filename){
     if(i<6){
       size += table.data[i];
     }
+    else if( i == 6 ){
+      size += (8*table.data[i]);
+    }
     else{
       size += (12*table.data[i]);
     }
@@ -177,7 +180,7 @@ int readOBJ(FILE * file, char * filename){
   fseek(file, size, SEEK_SET);
   for(size_t i=0; i < table.sz_strings/4; i++){
     read32;
-    uintTable[i] = ptr32;
+    uintTable[i] = ptr32;//Why does this not have to be converted to big endian?
   }
 
  
@@ -198,7 +201,7 @@ int readOBJ(FILE * file, char * filename){
     
     //Get to relocation section
     //size is size of file up to the string table
-    size_t relSize = (size - 12*(table.n_syms + table.n_refs + table.n_reloc));
+    size_t relSize = (size - (12*table.n_syms + 12*table.n_refs + 8*table.n_reloc));
     fseek(file,relSize,SEEK_SET);//set file pointer to relocation entries
     //printf("%d\n",relSize);
     //loop through every entry
@@ -242,7 +245,7 @@ int readOBJ(FILE * file, char * filename){
     printf("Reference information:\n");
 
     //Get to reference section
-    size_t refSize = (size -12*(table.n_syms + table.n_refs));
+    size_t refSize = (size - (12*table.n_syms + 12*table.n_refs));
     fseek(file, refSize, SEEK_SET);//set file to reference section
     //printf("%d\n",refSize); 
 
@@ -258,7 +261,6 @@ int readOBJ(FILE * file, char * filename){
       read8;
       refTable.type = ptr8;
       read16;
-      printf("%#x",refTable.sym);
       printf("\t%#010x type %#06x symbol %s\n", refTable.addr, refTable.type, strings+refTable.sym);
     }
   }
