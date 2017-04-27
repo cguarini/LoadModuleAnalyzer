@@ -19,6 +19,10 @@
 #define read32 fread(&ptr32,4,1,file)
 
 
+char * strcpy(char * dest, const char * src);
+void * memcpy(void *str1, const void *str2, size_t n);
+
+
 ///readWord
 ///Reads the big endian word and returns it in the correct,
 ///little endian order.
@@ -140,10 +144,70 @@ void readOBJ(FILE * file, char * filename){
   for(int i = 0; i < N_EH; i++){
     //Print every section that exists
     if(table.data[i]){
-      printf("Section %s is %d bytes long\n", sectionNames[i], table.data[i]);
+      char str[10];
+      if(i > 5 && i < 9){//reloc, ref and symtab
+        strcpy(str,"entries");
+      }
+      else{
+        strcpy(str,"bytes");
+      }
+      printf("Section %s is %d %s long\n", sectionNames[i], table.data[i], str);
     }
   }
   
+
+
+  //Create string table
+  uint32_t uintTable[table.sz_strings/4];
+  
+  //Get size of everything up to string table
+  int size = 52;//52 bytes in header block
+  for(int i=0; i<EH_IX_STR; i++){
+    if(i<6){
+      size += table.data[i];
+    }
+    else{
+      size += (12*table.data[i]);
+    }
+  }
+  
+  //Retrieve information from string table
+  fseek(file, size, SEEK_SET);
+  for(size_t i=0; i < table.sz_strings/4; i++){
+    read32;
+    uintTable[i] = ptr32;
+  }
+
+  //Create an array of strings
+  char strings[table.sz_strings];
+  //Copy uints into string array
+  memcpy(strings,uintTable,table.sz_strings);
+  
+  //Index the string array
+  int index[table.sz_strings];
+  index[0] = 0;
+  int count = 0;
+  int curr = 1;
+  for(size_t i=0; i<table.sz_strings; i++){
+    //Index every character after nulls
+    if(!strings[i]){//search for null characters
+      index[curr] = count+1;
+      curr++;//increment index cursor
+    }
+    count++;
+  }
+  for(int i=0;i<4;i++){
+    printf("%s\n",strings+index[i]);
+  }
+
+
+
+  //Relocation
+  //check if relocation table is empty
+  if(table.data[EH_IX_REL]){
+    //introductory line
+    printf("Relocation information:\n");
+  }
   
 
 }
